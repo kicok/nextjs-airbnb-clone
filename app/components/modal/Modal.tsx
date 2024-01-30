@@ -27,7 +27,7 @@ const Modal = ({ isOpen, onClose, onSubmit, title, body, footer, actionLabel, di
       if (disabled) {
          return;
       }
-      setShowModal(false);
+      // setShowModal(false);
       setTimeout(() => {
          if (onClose) onClose();
       }, 300);
@@ -76,9 +76,11 @@ const Modal = ({ isOpen, onClose, onSubmit, title, body, footer, actionLabel, di
                className="
                     relative
                     w-full
+                    sm:w-4/5
                     md:w-4/6
                     lg:w-3/6
-                    xl:w-2/5
+                    xl:w-2/5                    
+                    min-[1500px]:w-[600px]
                     my-6
                     mx-auto
                     h-full
@@ -163,6 +165,7 @@ const Modal = ({ isOpen, onClose, onSubmit, title, body, footer, actionLabel, di
                            )}
                            <Button disabled={disabled} label={actionLabel} onClick={handleSubmit} />
                         </div>
+                        {footer}
                      </div>
                   </div>
                </div>
