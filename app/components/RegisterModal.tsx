@@ -1,8 +1,9 @@
 'use client';
 
 import useRegisterModal from '@/app/hooks/useRegisterModal';
+import useLoginModal from '@/app/hooks/useLoginModal';
 import axios from 'axios';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import Modal from './modal/Modal';
 import Heading from './Heading';
@@ -15,6 +16,8 @@ import { signIn } from 'next-auth/react';
 
 const RegisterModal = () => {
    const registerModal = useRegisterModal(); //zustand
+   const loginModal = useLoginModal(); //zustand
+
    const [isLoading, setisLoading] = useState(false);
 
    const {
@@ -45,6 +48,12 @@ const RegisterModal = () => {
          });
    };
 
+   // open LoginModal => 로그인창으로 이동
+   const toggle = useCallback(() => {
+      registerModal.onClose();
+      loginModal.onOpen();
+   }, [loginModal, registerModal]);
+
    const bodyContent = (
       <div className="flex flex-col gap-4">
          <Heading title="Welcome to Airbnb" subtitle="Create an account" />
@@ -62,7 +71,7 @@ const RegisterModal = () => {
          <div className="text-neutral-500 text-center mt-4 font-light">
             <div className="justify-center flex flex-row items-center gap-2">
                <div>Already hava an account?</div>
-               <div onClick={registerModal.onClose} className="text-neutral-800 cursor-pointer hover:underline">
+               <div onClick={toggle} className="text-neutral-800 cursor-pointer hover:underline">
                   Login
                </div>
             </div>
@@ -73,7 +82,7 @@ const RegisterModal = () => {
       <Modal
          disabled={isLoading}
          isOpen={registerModal.isOpen}
-         title="Login"
+         title="Register"
          actionLabel="Continue"
          onClose={registerModal.onClose}
          onSubmit={handleSubmit(onSubmit)}
