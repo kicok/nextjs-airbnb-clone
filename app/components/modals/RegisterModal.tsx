@@ -2,20 +2,19 @@
 
 import useRegisterModal from '@/app/hooks/useRegisterModal';
 import useLoginModal from '@/app/hooks/useLoginModal';
+import axios from 'axios';
 import { useCallback, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
-import Modal from './modal/Modal';
-import Heading from './Heading';
-import Input from './input/Input';
+import Modal from './Modal';
+import Heading from '../Heading';
+import Input from '../input/Input';
 import toast from 'react-hot-toast';
-import Button from './Button';
+import Button from '../Button';
 import { FcGoogle } from 'react-icons/fc';
 import { AiFillGithub } from 'react-icons/ai';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
-const LoginModal = () => {
-   const router = useRouter();
+const RegisterModal = () => {
    const registerModal = useRegisterModal(); //zustand
    const loginModal = useLoginModal(); //zustand
 
@@ -27,6 +26,7 @@ const LoginModal = () => {
       formState: { errors },
    } = useForm<FieldValues>({
       defaultValues: {
+         name: '',
          email: '',
          password: '',
       },
@@ -35,31 +35,30 @@ const LoginModal = () => {
    const onSubmit: SubmitHandler<FieldValues> = (data) => {
       setisLoading(true);
 
-      // redirect 가 flase라면 현재 페이지로 다시 이동한다.
-      signIn('credentials', { ...data, redirect: false }).then((callback) => {
-         setisLoading(false);
-         if (callback?.ok) {
-            toast.success('Logged in');
-            router.refresh();
-            loginModal.onClose();
-         }
-
-         if (callback?.error) {
-            toast.error(callback?.error);
-         }
-      });
+      axios
+         .post('/api/register', data)
+         .then(() => {
+            registerModal.onClose();
+         })
+         .catch((error) => {
+            toast.error('something went wront ::' + error);
+         })
+         .finally(() => {
+            setisLoading(false);
+         });
    };
 
-   // open RegisterModal => 회원가입창으로 이동
+   // open LoginModal => 로그인창으로 이동
    const toggle = useCallback(() => {
-      loginModal.onClose();
-      registerModal.onOpen();
+      registerModal.onClose();
+      loginModal.onOpen();
    }, [loginModal, registerModal]);
 
    const bodyContent = (
       <div className="flex flex-col gap-4">
-         <Heading title="Welcome back" subtitle="Login to your account" />
+         <Heading title="Welcome to Airbnb" subtitle="Create an account" />
          <Input id="email" label="Email" disabled={isLoading} register={register} errors={errors} required />
+         <Input id="name" label="Name" disabled={isLoading} register={register} errors={errors} required />
          <Input id="password" label="Password" type="password" disabled={isLoading} register={register} errors={errors} required />
       </div>
    );
@@ -71,9 +70,9 @@ const LoginModal = () => {
          <Button outline label="Continue with Github" icon={AiFillGithub} onClick={() => signIn('github')}></Button>
          <div className="text-neutral-500 text-center mt-4 font-light">
             <div className="justify-center flex flex-row items-center gap-2">
-               <div>First time using Airbnb?</div>
+               <div>Already hava an account?</div>
                <div onClick={toggle} className="text-neutral-800 cursor-pointer hover:underline">
-                  Create an account
+                  Login
                </div>
             </div>
          </div>
@@ -82,10 +81,10 @@ const LoginModal = () => {
    return (
       <Modal
          disabled={isLoading}
-         isOpen={loginModal.isOpen}
-         title="Login"
+         isOpen={registerModal.isOpen}
+         title="Register"
          actionLabel="Continue"
-         onClose={loginModal.onClose}
+         onClose={registerModal.onClose}
          onSubmit={handleSubmit(onSubmit)}
          body={bodyContent}
          footer={footerContent}
@@ -93,4 +92,4 @@ const LoginModal = () => {
    );
 };
 
-export default LoginModal;
+export default RegisterModal;
