@@ -1,16 +1,19 @@
 'use client';
 import useRentModal from '@/app/hooks/useRentModal';
-import { FieldValues, useForm } from 'react-hook-form';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import Modal from './Modal';
 import { useMemo, useState } from 'react';
 import Heading from '../Heading';
 import { categories } from '../navbar/Categories';
-import CategoryInput from '../input/CategoryInput';
-import CountrySelect from '../input/CountrySelect';
+import CategoryInput from '../inputs/CategoryInput';
+import CountrySelect from '../inputs/CountrySelect';
 import dynamic from 'next/dynamic';
-import Counter from '../input/Counter';
-import ImageUpload from '../input/ImageUpload';
-import Input from '../input/Input';
+import Counter from '../inputs/Counter';
+import ImageUpload from '../inputs/ImageUpload';
+import Input from '../inputs/Input';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 enum STEPS {
     CATEGORY = 0,
@@ -22,6 +25,7 @@ enum STEPS {
 }
 
 const RentModal = () => {
+    const router = useRouter();
     const rentModal = useRentModal();
     const [step, setStep] = useState(STEPS.CATEGORY);
     const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +39,7 @@ const RentModal = () => {
         reset,
     } = useForm<FieldValues>({
         defaultValues: {
-            cateory: '',
+            category: '',
             location: null,
             guestCount: 1,
             roomCount: 1,
@@ -78,6 +82,32 @@ const RentModal = () => {
 
     const onNext = () => {
         setStep((value) => value + 1);
+    };
+
+    const onSubmit: SubmitHandler<FieldValues> = (data) => {
+        console.log('data', data);
+        if (step !== STEPS.PRICE) {
+            return onNext();
+        }
+
+        setIsLoading(true);
+
+        axios
+            .post('/api/listings', data)
+            .then(() => {
+                toast.success('Listing Created!');
+                router.refresh();
+
+                reset();
+                setStep(STEPS.CATEGORY);
+                rentModal.onClose();
+            })
+            .catch(() => {
+                toast.error('Something went wrong');
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
     };
 
     const actionLabel = useMemo(() => {
@@ -129,7 +159,7 @@ const RentModal = () => {
                 <Heading title="Where is your located?" subtitle="Help guests find you!" />
                 <CountrySelect
                     value={location}
-                    onChage={(value) => setCustomValue('location', value)}
+                    onChange={(value) => setCustomValue('location', value)}
                 />
                 <Map center={location?.latlng} />
             </div>
@@ -196,6 +226,7 @@ const RentModal = () => {
                     disabled={isLoading}
                     register={register}
                     errors={errors}
+                    required
                 />
                 <Input
                     id="description"
@@ -203,6 +234,7 @@ const RentModal = () => {
                     disabled={isLoading}
                     register={register}
                     errors={errors}
+                    required
                 />
             </div>
         );
@@ -230,7 +262,7 @@ const RentModal = () => {
         <Modal
             isOpen={rentModal.isOpen}
             onClose={rentModal.onClose}
-            onSubmit={onNext}
+            onSubmit={handleSubmit(onSubmit)}
             actionLabel={actionLabel}
             secondaryActionLabel={secondaryActionLabel}
             secondaryAction={step === STEPS.CATEGORY ? undefined : onBack}

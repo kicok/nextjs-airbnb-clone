@@ -7,7 +7,7 @@ import { useCallback, useState } from 'react';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import Modal from './Modal';
 import Heading from '../Heading';
-import Input from '../input/Input';
+import Input from '../inputs/Input';
 import toast from 'react-hot-toast';
 import Button from '../Button';
 import { FcGoogle } from 'react-icons/fc';
@@ -57,21 +57,56 @@ const RegisterModal = () => {
     const bodyContent = (
         <div className="flex flex-col gap-4">
             <Heading title="Welcome to Airbnb" subtitle="Create an account" />
-            <Input id="email" label="Email" disabled={isLoading} register={register} errors={errors} required />
-            <Input id="name" label="Name" disabled={isLoading} register={register} errors={errors} required />
-            <Input id="password" label="Password" type="password" disabled={isLoading} register={register} errors={errors} required />
+            <Input
+                id="email"
+                label="Email"
+                disabled={isLoading}
+                register={register}
+                errors={errors}
+                required
+            />
+            <Input
+                id="name"
+                label="Name"
+                disabled={isLoading}
+                register={register}
+                errors={errors}
+                required
+            />
+            <Input
+                id="password"
+                label="Password"
+                type="password"
+                disabled={isLoading}
+                register={register}
+                errors={errors}
+                required
+            />
         </div>
     );
 
     const footerContent = (
         <div className="flex flex-col gap-4 mt-3">
             <hr />
-            <Button outline label="Continue with Google" icon={FcGoogle} onClick={() => signIn('google')}></Button>
-            <Button outline label="Continue with Github" icon={AiFillGithub} onClick={() => signIn('github')}></Button>
+            <Button
+                outline
+                label="Continue with Google"
+                icon={FcGoogle}
+                onClick={() => signIn('google')}
+            ></Button>
+            <Button
+                outline
+                label="Continue with Github"
+                icon={AiFillGithub}
+                onClick={() => signIn('github')}
+            ></Button>
             <div className="text-neutral-500 text-center mt-4 font-light">
                 <div className="justify-center flex flex-row items-center gap-2">
                     <div>Already hava an account?</div>
-                    <div onClick={toggle} className="text-neutral-800 cursor-pointer hover:underline">
+                    <div
+                        onClick={toggle}
+                        className="text-neutral-800 cursor-pointer hover:underline"
+                    >
                         Login
                     </div>
                 </div>

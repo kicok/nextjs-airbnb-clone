@@ -9,35 +9,34 @@ import ToasterProvider from './providers/ToasterProvider';
 import getCurrentUser from './actions/getCurrentUser';
 
 export const metadata = {
-   title: 'Airbnb',
-   description: 'Airbnb clone',
+    title: 'Airbnb',
+    description: 'Airbnb clone',
 };
 
 const font = Nunito({
-   subsets: ['latin'],
+    subsets: ['latin'],
 });
 
 const onClose = () => {};
 const onSubmit = () => {};
 export default async function RootLayout({
-   children,
+    children,
 }: Readonly<{
-   children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-   const currentUser = await getCurrentUser();
-   return (
-      <html lang="en">
-         <body className={font.className}>
-            {/* <ClientOnly> */}
-            <ToasterProvider />
-            <RentModal />
-            <RegisterModal />
-            <LoginModal />
-            <Navbar currentUser={currentUser} />
-            {/* </ClientOnly> */}
-
-            {children}
-         </body>
-      </html>
-   );
+    const currentUser = await getCurrentUser();
+    return (
+        <html lang="en">
+            <body className={font.className}>
+                {/* <ClientOnly> */}
+                <ToasterProvider />
+                <RentModal />
+                <RegisterModal />
+                <LoginModal />
+                <Navbar currentUser={currentUser} />
+                {/* </ClientOnly> */}
+                <div className="pb-2- pt-28">{children}</div>
+            </body>
+        </html>
+    );
 }
