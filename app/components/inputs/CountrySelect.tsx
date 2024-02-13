@@ -11,10 +11,10 @@ export type CountrySelectValue = {
 
 interface CountrySelectProps {
     value?: CountrySelectValue;
-    onChage: (value: CountrySelectValue) => void;
+    onChange: (value: CountrySelectValue) => void;
 }
 
-const CountrySelect = ({ value, onChage }: CountrySelectProps) => {
+const CountrySelect = ({ value, onChange }: CountrySelectProps) => {
     const { getAll, getByValue } = useCountries();
 
     return (
@@ -24,7 +24,7 @@ const CountrySelect = ({ value, onChage }: CountrySelectProps) => {
                 isClearable
                 options={getAll()}
                 value={value}
-                onChange={(value) => onChage(value as CountrySelectValue)}
+                onChange={(value) => onChange(value as CountrySelectValue)}
                 formatOptionLabel={(option: any) => (
                     <div className="flex flex-row items-center gap-3">
                         <div>{option.flag}</div>
