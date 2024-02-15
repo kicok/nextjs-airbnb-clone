@@ -1,0 +1,61 @@
+'use client';
+import Container from '@/app/components/Container';
+import ListingHead from '@/app/components/listings/ListingHead';
+import ListingInfo from '@/app/components/listings/ListingInfo';
+import { categories } from '@/app/components/navbar/Categories';
+import { SafeListing, SafeUser } from '@/app/type';
+import { Reservation } from '@prisma/client';
+import { ca } from 'date-fns/locale';
+import L from 'leaflet';
+import { useMemo } from 'react';
+interface ListingClientProps {
+    reservations?: Reservation[];
+
+    // prisma에서 값을 가져올때 listing을 호출할때 include{user:true} 가 있으므로 user 타입을 추가한다.
+    listing: SafeListing & {
+        user: SafeUser;
+    };
+    currentUser?: SafeUser | null;
+}
+
+const ListingClient = ({ listing, currentUser }: ListingClientProps) => {
+    const category = useMemo(() => {
+        return categories.find((item) => item.label === listing.category);
+    }, [listing.category]);
+    return (
+        <Container>
+            <div className="max-w-screen-lg mx-auto">
+                <div className="flex flex-col gap-6">
+                    <ListingHead
+                        title={listing.title}
+                        imageSrc={listing.imageSrc}
+                        locationValue={listing.locationValue}
+                        id={listing.id}
+                        currentUser={currentUser}
+                    />
+                    <div
+                        className="
+                        grid
+                        grid-cols-1
+                        md:grid-cols-7
+                        md:gap-10
+                        mt-6
+                     "
+                    >
+                        <ListingInfo
+                            user={listing.user}
+                            category={category}
+                            description={listing.description}
+                            guestCount={listing.guestCount}
+                            roomCount={listing.roomCount}
+                            bathroomCount={listing.bathroomCount}
+                            locationValue={listing.locationValue}
+                        />
+                    </div>
+                </div>
+            </div>
+        </Container>
+    );
+};
+
+export default ListingClient;
