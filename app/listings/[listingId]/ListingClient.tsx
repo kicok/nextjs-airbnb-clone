@@ -1,13 +1,26 @@
 'use client';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { differenceInCalendarDays, differenceInDays, eachDayOfInterval } from 'date-fns';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Container from '@/app/components/Container';
+import { SafeListing, SafeUser } from '@/app/type';
 import ListingHead from '@/app/components/listings/ListingHead';
 import ListingInfo from '@/app/components/listings/ListingInfo';
 import { categories } from '@/app/components/navbar/Categories';
-import { SafeListing, SafeUser } from '@/app/type';
+import ListingReservation from '@/app/components/listings/ListingReservation';
 import { Reservation } from '@prisma/client';
-import { ca } from 'date-fns/locale';
-import L from 'leaflet';
-import { useMemo } from 'react';
+
+import useLoginModal from '@/app/hooks/useLoginModal';
+import { Range } from 'react-date-range';
+
+const initialDateRange = {
+    startDate: new Date(),
+    endDate: new Date(),
+    key: 'selection',
+};
+
 interface ListingClientProps {
     reservations?: Reservation[];
 
@@ -18,7 +31,86 @@ interface ListingClientProps {
     currentUser?: SafeUser | null;
 }
 
-const ListingClient = ({ listing, currentUser }: ListingClientProps) => {
+const ListingClient = ({ listing, reservations = [], currentUser }: ListingClientProps) => {
+    const loginModal = useLoginModal();
+    const router = useRouter();
+
+    const disabledDates = useMemo(() => {
+        let dates: Date[] = [];
+
+        reservations.forEach((reservation) => {
+            // eachDayOfInterval : 지정된 시간 간격내의 날짜배열을 반환한다.
+            const range = eachDayOfInterval({
+                start: new Date(reservation.startDate),
+                end: new Date(reservation.endDate),
+            });
+
+            dates = [...dates, ...range];
+        });
+        return dates;
+    }, [reservations]);
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [totalPrice, setTotalPrice] = useState(listing.price);
+    const [dateRange, setDateRange] = useState<Range>(initialDateRange);
+
+    const onCreateReservation = useCallback(() => {
+        if (!currentUser) {
+            return loginModal.onOpen();
+        }
+        setIsLoading(true);
+
+        axios
+            .post('/api/reservations', {
+                totalPrice,
+                startDate: dateRange.startDate,
+                endDate: dateRange.endDate,
+                listingId: listing.id,
+            })
+            .then(() => {
+                toast.success('Listing reserverd');
+                setDateRange(initialDateRange);
+                // Redirect to /trips
+                router.refresh();
+            })
+            .catch(() => {
+                toast.error('Something went wrong');
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    }, [currentUser, loginModal, dateRange, listing, router, totalPrice]);
+
+    // totalPrice
+    useEffect(() => {
+        if (dateRange.startDate && dateRange.endDate) {
+            const dayCount = differenceInCalendarDays(dateRange.endDate, dateRange.startDate);
+            /**
+             *  * const result = differenceInCalendarDays(
+             *   new Date(2011, 6, 3, 0, 1),
+             *   new Date(2011, 6, 2, 23, 59)
+             * )==> 1
+             */
+            // const dayCount2 = differenceInDays(dateRange.endDate, dateRange.startDate);
+            // 위의 코드처럼 2날짜사이의 날짜의 차이를 게산 하지만 시간개념이 추가되어 24시간 미만이면 1일이 아님
+            // 즉 1일은 현지시간과 이전날의 현지시간이 같아질 때를 말함.
+
+            /**
+             * * const result = differenceInDays(
+             *   new Date(2011, 6, 3, 0, 1),
+             *   new Date(2011, 6, 2, 23, 59)
+             * ) => 0
+             *
+             */
+
+            if (dayCount && listing.price) {
+                setTotalPrice(dayCount * listing.price);
+            } else {
+                setTotalPrice(listing.price); // 1박 비용: dafault값 (calendar의 날짜를 선택하지 않았을때)
+            }
+        }
+    }, [dateRange, listing.price]);
+
     const category = useMemo(() => {
         return categories.find((item) => item.label === listing.category);
     }, [listing.category]);
@@ -51,6 +143,24 @@ const ListingClient = ({ listing, currentUser }: ListingClientProps) => {
                             bathroomCount={listing.bathroomCount}
                             locationValue={listing.locationValue}
                         />
+                        <div
+                            className="
+                                order-first
+                                mb-10
+                                md:order-last
+                                md:col-span-3
+                            "
+                        >
+                            <ListingReservation
+                                price={listing.price}
+                                totalPrice={totalPrice}
+                                onChangeDate={(value) => setDateRange(value)}
+                                dateRange={dateRange}
+                                onSubmit={onCreateReservation}
+                                disabled={isLoading}
+                                disabledDates={disabledDates}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
