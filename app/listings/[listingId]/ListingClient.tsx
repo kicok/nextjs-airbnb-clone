@@ -1,16 +1,15 @@
 'use client';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { differenceInCalendarDays, differenceInDays, eachDayOfInterval } from 'date-fns';
+import { differenceInCalendarDays, eachDayOfInterval } from 'date-fns';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@/app/components/Container';
-import { SafeListing, SafeUser } from '@/app/type';
+import { SafeListing, SafeReservation, SafeUser } from '@/app/type';
 import ListingHead from '@/app/components/listings/ListingHead';
 import ListingInfo from '@/app/components/listings/ListingInfo';
 import { categories } from '@/app/components/navbar/Categories';
 import ListingReservation from '@/app/components/listings/ListingReservation';
-import { Reservation } from '@prisma/client';
 
 import useLoginModal from '@/app/hooks/useLoginModal';
 import { Range } from 'react-date-range';
@@ -22,7 +21,7 @@ const initialDateRange = {
 };
 
 interface ListingClientProps {
-    reservations?: Reservation[];
+    reservations?: SafeReservation[];
 
     // prisma에서 값을 가져올때 listing을 호출할때 include{user:true} 가 있으므로 user 타입을 추가한다.
     listing: SafeListing & {
@@ -35,6 +34,7 @@ const ListingClient = ({ listing, reservations = [], currentUser }: ListingClien
     const loginModal = useLoginModal();
     const router = useRouter();
 
+    //예약 날짜의 시작일~종료일사이의 기간을 비활성화시키기위한 코드
     const disabledDates = useMemo(() => {
         let dates: Date[] = [];
 
