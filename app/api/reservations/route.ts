@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import prisma from '@/app/libs/prismadb';
 import getCurrentUser from '@/app/actions/getCurrentUser';
 
+// 신규 예약 add
 export async function POST(request: Request) {
     const currentUser = await getCurrentUser();
     if (!currentUser) {

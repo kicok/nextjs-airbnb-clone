@@ -7,6 +7,7 @@ interface IParams {
     reservationId?: string;
 }
 
+// 예약 취소(삭제)
 export async function DELETE(request: Request, { params }: { params: IParams }) {
     const currentUser = await getCurrentUser();
 

@@ -54,6 +54,7 @@ const ListingClient = ({ listing, reservations = [], currentUser }: ListingClien
     const [totalPrice, setTotalPrice] = useState(listing.price);
     const [dateRange, setDateRange] = useState<Range>(initialDateRange);
 
+    // 신규 예약
     const onCreateReservation = useCallback(() => {
         if (!currentUser) {
             return loginModal.onOpen();
