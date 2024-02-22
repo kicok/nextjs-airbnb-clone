@@ -1,4 +1,5 @@
 import EmptyState from '../components/EmptyState';
+import ClientOnly from '../components/ClientOnly';
 
 import getCurrentUser from '../actions/getCurrentUser';
 import getReservations from '../actions/getReservations';
@@ -7,7 +8,11 @@ import ReservationClient from './ReservationClient';
 const ReservationPage = async () => {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-        return <EmptyState title="Unauthroized" subtitle="Please login" />;
+        return (
+            <ClientOnly>
+                <EmptyState title="Unauthroized" subtitle="Please login" />;
+            </ClientOnly>
+        );
     }
 
     const reservations = await getReservations({
@@ -16,14 +21,20 @@ const ReservationPage = async () => {
 
     if (reservations.length === 0) {
         return (
-            <EmptyState
-                title="No reservations found"
-                subtitle="Looks like you have no reservations on your properties"
-            />
+            <ClientOnly>
+                <EmptyState
+                    title="No reservations found"
+                    subtitle="Looks like you have no reservations on your properties"
+                />
+            </ClientOnly>
         );
     }
 
-    return <ReservationClient reservations={reservations} currentUser={currentUser} />;
+    return (
+        <ClientOnly>
+            <ReservationClient reservations={reservations} currentUser={currentUser} />;
+        </ClientOnly>
+    );
 };
 
 export default ReservationPage;
